@@ -28,8 +28,8 @@ def open_image():
     if file_path:
         global image, photo_image
         image = Image.open(file_path)
-        new_width = int((WIDTH / 2))
-        image = image.resize((new_width, HEIGHT), Image.LANCZOS)
+        WIDTH, HEIGHT = image.size
+        image = image.resize((WIDTH, HEIGHT), Image.LANCZOS)
 
         image = ImageTk.PhotoImage(image)
         canvas.create_image(0, 0, anchor="nw", image=image)
@@ -49,8 +49,7 @@ def flip_image():
             image = Image.open(file_path)
             is_flipped = False
         # resize the image to fit the canvas
-        new_width = int((WIDTH / 2))
-        image = image.resize((new_width, HEIGHT), Image.LANCZOS)
+        image = image.resize((WIDTH, HEIGHT), Image.LANCZOS)
         # convert the PIL image to a Tkinter PhotoImage and display it on the canvas
         photo_image = ImageTk.PhotoImage(image)
         canvas.create_image(0, 0, anchor="nw", image=photo_image)
@@ -70,15 +69,14 @@ def rotate_image():
         # open the image and rotate it
 
         image = Image.open(file_path)
-        new_width = int((WIDTH / 2))
-        image = image.resize((new_width, HEIGHT), Image.LANCZOS)
+        image = image.resize((WIDTH, HEIGHT), Image.LANCZOS)
         rotated_image = image.rotate(rotation_angle + 90)
         rotation_angle += 90
         # reset image if angle is a multiple of 360 degrees
         if rotation_angle % 360 == 0:
             rotation_angle = 0
             image = Image.open(file_path)
-            image = image.resize((new_width, HEIGHT), Image.LANCZOS)
+            image = image.resize((WIDTH, HEIGHT), Image.LANCZOS)
             rotated_image = image
         # convert the PIL image to a Tkinter PhotoImage and display it on the canvas
         photo_image = ImageTk.PhotoImage(rotated_image)
@@ -103,6 +101,8 @@ def apply_filter(filter):
             # apply the filter to the rotated image
             if filter == "Black and White":
                 rotated_image = ImageOps.grayscale(rotated_image)
+            elif filter == "No Filter":
+                rotated_image = rotated_image
             elif filter == "Blur":
                 rotated_image = rotated_image.filter(ImageFilter.BLUR)
             elif filter == "Contour":
@@ -125,6 +125,8 @@ def apply_filter(filter):
             # apply the filter to the rotated image
             if filter == "Black and White":
                 rotated_image = ImageOps.grayscale(rotated_image)
+            elif filter == "No Filter":
+                rotated_image = rotated_image
             elif filter == "Blur":
                 rotated_image = rotated_image.filter(ImageFilter.BLUR)
             elif filter == "Contour":
@@ -146,6 +148,8 @@ def apply_filter(filter):
             image = Image.open(file_path)
             if filter == "Black and White":
                 image = ImageOps.grayscale(image)
+            elif filter == "No Filter":
+                image = image
             elif filter == "Blur":
                 image = image.filter(ImageFilter.BLUR)
             elif filter == "Sharpen":
@@ -162,8 +166,7 @@ def apply_filter(filter):
                 image = image.filter(ImageFilter.CONTOUR)
             rotated_image = image
         # resize the rotated/flipped image to fit the canvas
-        new_width = int((WIDTH / 2))
-        rotated_image = rotated_image.resize((new_width, HEIGHT), Image.LANCZOS)
+        rotated_image = rotated_image.resize((WIDTH, HEIGHT), Image.LANCZOS)
         # convert the PIL image to a Tkinter PhotoImage and display it on the canvas
         photo_image = ImageTk.PhotoImage(rotated_image)
         canvas.create_image(0, 0, anchor="nw", image=photo_image)
@@ -201,8 +204,7 @@ def save_image():
         # check if the image has been flipped or rotated
         if is_flipped or rotation_angle % 360 != 0:
             # Resize and rotate the image
-            new_width = int((WIDTH / 2))
-            image = image.resize((new_width, HEIGHT), Image.LANCZOS)
+            image = image.resize((WIDTH, HEIGHT), Image.LANCZOS)
             if is_flipped:
                 image = image.transpose(Image.FLIP_LEFT_RIGHT)
             if rotation_angle % 360 != 0:
@@ -214,6 +216,8 @@ def save_image():
         if filter:
             if filter == "Black and White":
                 image = ImageOps.grayscale(image)
+            elif filter == "No Filter":
+                image = image
             elif filter == "Blur":
                 image = image.filter(ImageFilter.BLUR)
             elif filter == "Sharpen":
@@ -241,8 +245,8 @@ def save_image():
 
 root = ttk.Window(themename="cosmo")
 root.title("Image Editor")
-root.geometry("510x580+300+110")
-root.resizable(0, 0)
+root.geometry("1600x700+300+110")
+root.resizable(1, 1)
 icon = ttk.PhotoImage(file='icon.png')
 root.iconphoto(False, icon)
 
@@ -263,7 +267,7 @@ filter_label = ttk.Label(left_frame, text="Select Filter:", background="white")
 filter_label.pack(padx=0, pady=2)
 
 # a list of filters
-image_filters = ["Contour", "Black and White", "Blur", "Detail", "Emboss", "Edge Enhance", "Sharpen", "Smooth"]
+image_filters = ["No FIlter","Contour", "Black and White", "Blur", "Detail", "Emboss", "Edge Enhance", "Sharpen", "Smooth"]
 
 # combobox for the filters
 filter_combobox = ttk.Combobox(left_frame, values=image_filters, width=15)

@@ -18,7 +18,6 @@ file_path = ""
 pen_size = 3
 pen_color = "black"
 
-
 #Functions
 
 # function to open the image file

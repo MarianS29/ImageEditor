@@ -336,6 +336,7 @@ color_icon = ttk.PhotoImage(file = 'color.png').subsample(12, 12)
 erase_icon = ttk.PhotoImage(file = 'erase.png').subsample(12, 12)
 save_icon = ttk.PhotoImage(file = 'saved.png').subsample(12, 12)
 
+
 # button for adding/opening the image file
 image_button = ttk.Button(left_frame, image=image_icon, bootstyle="primary-outline", command=open_image)
 image_button.pack(pady=22)

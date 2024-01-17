@@ -12,8 +12,8 @@ from PIL import Image, ImageOps, ImageTk, ImageFilter, ImageGrab
 
 #Global vars
 
-WIDTH = 1600
-HEIGHT = 700
+WIDTH = 750
+HEIGHT = 560
 file_path = ""
 pen_size = 3
 pen_color = "black"
@@ -28,11 +28,9 @@ def open_image():
     if file_path:
         global image, photo_image
         image = Image.open(file_path)
-        WIDTH, HEIGHT = image.size
-        raport = WIDTH/HEIGHT
-        HEIGHT = 666
-        WIDTH = (int)(raport*HEIGHT)
-        image = image.resize((WIDTH, HEIGHT), Image.LANCZOS)
+        new_width = int((WIDTH / 2))
+        image = image.resize((new_width, HEIGHT), Image.LANCZOS)
+
         image = ImageTk.PhotoImage(image)
         canvas.create_image(0, 0, anchor="nw", image=image)
 
@@ -41,7 +39,7 @@ is_flipped = False
 
 def flip_image():
     try:
-        global rotated_image, image, photo_image, is_flipped
+        global image, photo_image, is_flipped
         if not is_flipped:
             # open the image and flip it left and right
             image = Image.open(file_path).transpose(Image.FLIP_LEFT_RIGHT)
@@ -51,11 +49,8 @@ def flip_image():
             image = Image.open(file_path)
             is_flipped = False
         # resize the image to fit the canvas
-        WIDTH, HEIGHT = image.size
-        raport = WIDTH / HEIGHT
-        HEIGHT = 666
-        WIDTH = (int)(raport * HEIGHT)
-        image = image.resize((WIDTH, HEIGHT), Image.LANCZOS)
+        new_width = int((WIDTH / 2))
+        image = image.resize((new_width, HEIGHT), Image.LANCZOS)
         # convert the PIL image to a Tkinter PhotoImage and display it on the canvas
         photo_image = ImageTk.PhotoImage(image)
         canvas.create_image(0, 0, anchor="nw", image=photo_image)
@@ -75,22 +70,15 @@ def rotate_image():
         # open the image and rotate it
 
         image = Image.open(file_path)
-        WIDTH, HEIGHT = image.size
-        raport = WIDTH / HEIGHT
-        HEIGHT = 666
-        WIDTH = (int)(raport * HEIGHT)
-        image = image.resize((WIDTH, HEIGHT), Image.LANCZOS)
+        new_width = int((WIDTH / 2))
+        image = image.resize((new_width, HEIGHT), Image.LANCZOS)
         rotated_image = image.rotate(rotation_angle + 90)
         rotation_angle += 90
         # reset image if angle is a multiple of 360 degrees
         if rotation_angle % 360 == 0:
             rotation_angle = 0
             image = Image.open(file_path)
-            WIDTH, HEIGHT = image.size
-            raport = WIDTH / HEIGHT
-            HEIGHT = 666
-            WIDTH = (int)(raport * HEIGHT)
-            image = image.resize((WIDTH, HEIGHT), Image.LANCZOS)
+            image = image.resize((new_width, HEIGHT), Image.LANCZOS)
             rotated_image = image
         # convert the PIL image to a Tkinter PhotoImage and display it on the canvas
         photo_image = ImageTk.PhotoImage(rotated_image)
@@ -98,6 +86,9 @@ def rotate_image():
     # catches errors
     except:
         showerror(title='Rotate Image Error', message='Please select an image to rotate!')
+
+##############################  Cea mai importanta parte din proiect: filtrele.
+######   Trebuie sa modificam cu filtrele de la PI!!!!!!!!!!!!!!!!!!!!!!!!!
 
 # function for applying filters to the opened image file
 def apply_filter(filter):
@@ -112,10 +103,6 @@ def apply_filter(filter):
             # apply the filter to the rotated image
             if filter == "Black and White":
                 rotated_image = ImageOps.grayscale(rotated_image)
-            elif filter == "No Filter":
-                rotated_image = image
-            elif filter == "Update Image":
-                rotated_image = image
             elif filter == "Blur":
                 rotated_image = rotated_image.filter(ImageFilter.BLUR)
             elif filter == "Contour":
@@ -138,10 +125,6 @@ def apply_filter(filter):
             # apply the filter to the rotated image
             if filter == "Black and White":
                 rotated_image = ImageOps.grayscale(rotated_image)
-            elif filter == "No Filter":
-                rotated_image = rotated_image
-            elif filter == "Update Image":
-                rotated_image = rotated_image
             elif filter == "Blur":
                 rotated_image = rotated_image.filter(ImageFilter.BLUR)
             elif filter == "Contour":
@@ -156,15 +139,13 @@ def apply_filter(filter):
                 rotated_image = rotated_image.filter(ImageFilter.SHARPEN)
             elif filter == "Smooth":
                 rotated_image = rotated_image.filter(ImageFilter.SMOOTH)
+            else:
+                rotated_image = Image.open(file_path).rotate(rotation_angle)
         else:
             # apply the filter to the original image
             image = Image.open(file_path)
             if filter == "Black and White":
                 image = ImageOps.grayscale(image)
-            elif filter == "Update Image":
-                image = image
-            elif filter == "No Filter":
-                image = image
             elif filter == "Blur":
                 image = image.filter(ImageFilter.BLUR)
             elif filter == "Sharpen":
@@ -181,11 +162,8 @@ def apply_filter(filter):
                 image = image.filter(ImageFilter.CONTOUR)
             rotated_image = image
         # resize the rotated/flipped image to fit the canvas
-        WIDTH, HEIGHT = rotated_image.size
-        raport = WIDTH / HEIGHT
-        HEIGHT = 666
-        WIDTH = (int)(raport * HEIGHT)
-        rotated_image = rotated_image.resize((WIDTH, HEIGHT), Image.LANCZOS)
+        new_width = int((WIDTH / 2))
+        rotated_image = rotated_image.resize((new_width, HEIGHT), Image.LANCZOS)
         # convert the PIL image to a Tkinter PhotoImage and display it on the canvas
         photo_image = ImageTk.PhotoImage(rotated_image)
         canvas.create_image(0, 0, anchor="nw", image=photo_image)
@@ -216,46 +194,19 @@ def erase_lines():
 
 # the function for saving an image
 def save_image():
-    global photo_image, file_path, is_flipped, rotation_angle
+    global file_path, is_flipped, rotation_angle
     if file_path:
         # create a new PIL Image object from the canvas
-        image = Image.open(file_path)
-        WIDTH, HEIGHT = image.size
-        raport = WIDTH / HEIGHT
-        HEIGHT = 666
-        WIDTH = (int)(raport * HEIGHT)
-        image = ImageGrab.grab(bbox=(canvas.winfo_rootx(), canvas.winfo_rooty(), canvas.winfo_rootx() + WIDTH, canvas.winfo_rooty() + HEIGHT))
+        image = ImageGrab.grab(bbox=(canvas.winfo_rootx(), canvas.winfo_rooty(), canvas.winfo_rootx() + canvas.winfo_width(), canvas.winfo_rooty() + canvas.winfo_height()))
         # check if the image has been flipped or rotated
-        if is_flipped and rotation_angle % 360 != 0:
-            WIDTH, HEIGHT = image.size
-            raport = WIDTH / HEIGHT
-            HEIGHT = 666
-            WIDTH = (int)(raport * HEIGHT)
-            image = image.resize((WIDTH, HEIGHT), Image.LANCZOS)
-            image = image.transpose(Image.FLIP_LEFT_RIGHT)
-            image = image.rotate(rotation_angle)
-            file_path = file_path.split(".")[0] + "_mod.jpg"
         if is_flipped or rotation_angle % 360 != 0:
             # Resize and rotate the image
-            WIDTH, HEIGHT = image.size
-            raport = WIDTH / HEIGHT
-            HEIGHT = 666
-            WIDTH = (int)(raport * HEIGHT)
-            image = image.resize((WIDTH, HEIGHT), Image.LANCZOS)
+            new_width = int((WIDTH / 2))
+            image = image.resize((new_width, HEIGHT), Image.LANCZOS)
             if is_flipped:
                 image = image.transpose(Image.FLIP_LEFT_RIGHT)
-                WIDTH, HEIGHT = image.size
-                raport = WIDTH / HEIGHT
-                HEIGHT = 666
-                WIDTH = (int)(raport * HEIGHT)
-                image = image.resize((WIDTH, HEIGHT), Image.LANCZOS)
             if rotation_angle % 360 != 0:
-                # image = image.rotate(rotation_angle)
-                WIDTH, HEIGHT = image.size
-                raport = WIDTH / HEIGHT
-                HEIGHT = 666
-                WIDTH = (int)(raport * HEIGHT)
-                image = image.resize((WIDTH, HEIGHT), Image.LANCZOS)
+                image = image.rotate(rotation_angle)
             # update the file path to include the modifications in the file name
             file_path = file_path.split(".")[0] + "_mod.jpg"
         # apply any filters to the image before saving
@@ -263,10 +214,6 @@ def save_image():
         if filter:
             if filter == "Black and White":
                 image = ImageOps.grayscale(image)
-            # elif filter == "Update Image":
-            #     image = image
-            elif filter == "No Filter":
-                image = image
             elif filter == "Blur":
                 image = image.filter(ImageFilter.BLUR)
             elif filter == "Sharpen":
@@ -290,14 +237,12 @@ def save_image():
                 # save the image to a file
                 image.save(file_path)
 
-
-
 #GUI
 
-root = ttk.Window(themename="superhero")
+root = ttk.Window(themename="cosmo")
 root.title("Image Editor")
-root.geometry("1300x700+300+110")
-root.resizable(1, 1)
+root.geometry("510x580+300+110")
+root.resizable(0, 0)
 icon = ttk.PhotoImage(file='icon.png')
 root.iconphoto(False, icon)
 
@@ -314,16 +259,15 @@ canvas.bind("<B1-Motion>", draw)
 ############################### Aici referim filtrele care sunt partea principala din proiect
 
 # label
-filter_label = ttk.Label(left_frame, text="Select Filter:", background="#2b3e50")
-filter_label.pack(padx=0, pady=1)
+filter_label = ttk.Label(left_frame, text="Select Filter:", background="white")
+filter_label.pack(padx=0, pady=2)
 
 # a list of filters
-image_filters = ["No Filter","Contour", "Black and White", "Blur", "Detail", "Emboss", "Edge Enhance", "Sharpen", "Smooth","Update Image"]
+image_filters = ["Contour", "Black and White", "Blur", "Detail", "Emboss", "Edge Enhance", "Sharpen", "Smooth"]
 
 # combobox for the filters
 filter_combobox = ttk.Combobox(left_frame, values=image_filters, width=15)
-filter_combobox.current(0)
-filter_combobox.pack(padx=10, pady=0)
+filter_combobox.pack(padx=10, pady=5)
 filter_combobox.bind("<<ComboboxSelected>>", lambda event: apply_filter(filter_combobox.get()))
 #####################################################
 
@@ -337,22 +281,25 @@ erase_icon = ttk.PhotoImage(file = 'erase.png').subsample(12, 12)
 save_icon = ttk.PhotoImage(file = 'saved.png').subsample(12, 12)
 
 # button for adding/opening the image file
-image_button = ttk.Button(left_frame, image=image_icon, bootstyle="primary-outline", command=open_image)
-image_button.pack(pady=22)
+image_button = ttk.Button(left_frame, image=image_icon, bootstyle="light", command=open_image)
+image_button.pack(pady=5)
 # button for flipping the image file
-flip_button = ttk.Button(left_frame, image=flip_icon, bootstyle="info-outline", command=flip_image)
-flip_button.pack(pady=22)
+flip_button = ttk.Button(left_frame, image=flip_icon, bootstyle="light", command=flip_image)
+flip_button.pack(pady=5)
 # button for rotating the image file
-rotate_button = ttk.Button(left_frame, image=rotate_icon, bootstyle="warning-outline", command=rotate_image)
-rotate_button.pack(pady=22)
+rotate_button = ttk.Button(left_frame, image=rotate_icon, bootstyle="light", command=rotate_image)
+rotate_button.pack(pady=5)
 # button for choosing pen color
-color_button = ttk.Button(left_frame, image=color_icon, bootstyle="success-outline", command=change_color)
-color_button.pack(pady=22)
+color_button = ttk.Button(left_frame, image=color_icon, bootstyle="light", command=change_color)
+color_button.pack(pady=5)
 # button for erasing the lines drawn over the image file
-erase_button = ttk.Button(left_frame, image=erase_icon, bootstyle="light-outline", command=erase_lines )
-erase_button.pack(pady=22)
+erase_button = ttk.Button(left_frame, image=erase_icon, bootstyle="light", command=erase_lines )
+erase_button.pack(pady=5)
 # button for saving the image file
-save_button = ttk.Button(left_frame, image=save_icon, bootstyle='danger-outline', command=save_image)
-save_button.pack(pady=22)
+save_button = ttk.Button(left_frame, image=save_icon, bootstyle="light", command=save_image)
+save_button.pack(pady=5)
+
+
 
 root.mainloop()
+
